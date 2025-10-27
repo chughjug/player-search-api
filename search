@@ -1,0 +1,98 @@
+#!/usr/bin/env python3
+"""
+Standalone Player Search - No installation required
+Just place this file anywhere and run: python3 search "Player Name"
+"""
+
+import sys
+import urllib.request
+import urllib.parse
+import json
+
+API_URL = "https://player-search-api-60b22a3031bd.herokuapp.com"
+
+
+def search_players(name, max_results=10):
+    """Search for players using the API (no external dependencies)"""
+    try:
+        url = f"{API_URL}/api/search"
+        params = urllib.parse.urlencode({
+            "name": name,
+            "max": max_results
+        })
+        
+        print(f"\n🔍 Searching for: {name}...")
+        
+        with urllib.request.urlopen(f"{url}?{params}", timeout=60) as response:
+            data = json.loads(response.read().decode())
+            return data
+            
+    except Exception as e:
+        print(f"❌ Error: {e}")
+        return None
+
+
+def print_table(players):
+    """Print players in a formatted table"""
+    if not players or len(players) == 0:
+        print("\n   No players found.")
+        return
+    
+    # Table header
+    header = f"\n{'Name':<35} {'ID':<12} {'State':<6} {'Regular':<10} {'Quick':<10} {'Blitz':<10}"
+    print("=" * 92)
+    print(header)
+    print("=" * 92)
+    
+    # Table rows
+    for player in players:
+        name = player.get('name', '').replace('\n', ' ').strip()
+        member_id = player.get('memberId', '').strip()
+        state = player.get('state') or 'N/A'
+        if isinstance(state, str):
+            state = state.strip()
+        ratings = player.get('ratings', {})
+        regular = str(ratings.get('regular', '')) if ratings.get('regular') else ''
+        quick = str(ratings.get('quick', '')) if ratings.get('quick') else ''
+        blitz = str(ratings.get('blitz', '')) if ratings.get('blitz') else ''
+        
+        # Truncate long names
+        if len(name) > 34:
+            name = name[:31] + '...'
+        
+        print(f"{name:<35} {member_id:<12} {state:<6} {regular:<10} {quick:<10} {blitz:<10}")
+    
+    print("=" * 92)
+    print(f"\n✅ Found {len(players)} player(s)\n")
+
+
+def main():
+    """Main function"""
+    if len(sys.argv) < 2:
+        print("\n📋 Player Search CLI")
+        print("Usage: python3 search \"Player Name\" [max_results]")
+        print("\nExample:")
+        print("  python3 search Smith")
+        print("  python3 search \"Chugh\" 20\n")
+        sys.exit(1)
+    
+    player_name = sys.argv[1]
+    max_results = 10
+    
+    if len(sys.argv) > 2:
+        try:
+            max_results = int(sys.argv[2])
+        except ValueError:
+            print("⚠️  Invalid max_results, using default (10)")
+    
+    data = search_players(player_name, max_results)
+    
+    if data and 'players' in data:
+        print_table(data['players'])
+    else:
+        print("\n❌ Failed to retrieve player data")
+
+
+if __name__ == "__main__":
+    main()
+
