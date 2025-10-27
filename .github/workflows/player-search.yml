@@ -1,0 +1,64 @@
+name: Player Search API
+
+on:
+  workflow_dispatch:
+    inputs:
+      player_name:
+        description: 'Player name to search for'
+        required: true
+        type: string
+  push:
+    branches:
+      - main
+    paths:
+      - 'api/**'
+  schedule:
+    # Runs every hour
+    - cron: '0 * * * *'
+
+jobs:
+  search-players:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+    
+    - name: Install dependencies
+      run: |
+        npm install
+    
+    - name: Install Playwright browsers
+      run: |
+        npx playwright install chromium
+        npx playwright install-deps chromium
+    
+    - name: Create data directory
+      run: |
+        mkdir -p data
+    
+    - name: Run player search
+      id: search
+      run: |
+        PLAYER_NAME="${{ inputs.player_name || 'Smith' }}"
+        node api/search-and-export.js "$PLAYER_NAME"
+        echo "csv_file=data/results_${PLAYER_NAME// /_}.csv" >> $GITHUB_OUTPUT
+    
+    - name: Upload results
+      uses: actions/upload-artifact@v3
+      with:
+        name: player-results
+        path: data/*.csv
+    
+    - name: Publish to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v3
+      if: github.event_name == 'push'
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./data
+

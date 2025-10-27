@@ -1,0 +1,40 @@
+name: Deploy API Server
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+    
+    - name: Install dependencies
+      run: npm install
+    
+    - name: Run API tests
+      run: |
+        echo "Starting API server..."
+        npm start &
+        sleep 10
+        
+        echo "Testing API..."
+        curl -f http://localhost:3000/health || exit 1
+        curl -f "http://localhost:3000/api/search?name=Test&max=1" || exit 1
+        
+        echo "API tests passed!"
+    
+    - name: Stop server
+      run: |
+        pkill -f "node api/server.js" || true
+
