@@ -40,10 +40,10 @@ def print_table(players):
         return
     
     # Table header
-    header = f"\n{'Name':<35} {'ID':<12} {'State':<6} {'Regular':<10} {'Quick':<10} {'Blitz':<10}"
-    print("=" * 92)
+    header = f"\n{'Name':<30} {'ID':<10} {'State':<6} {'Regular':<10} {'Quick':<10} {'Blitz':<10} {'Online':<10}"
+    print("=" * 110)
     print(header)
-    print("=" * 92)
+    print("=" * 110)
     
     # Table rows
     for player in players:
@@ -54,19 +54,30 @@ def print_table(players):
             state = state.strip()
         else:
             state = str(state)
+        
         ratings = player.get('ratings', {})
-        regular = ratings.get('regular', '') or ''
-        quick = ratings.get('quick', '') or ''
-        blitz = ratings.get('blitz', '') or ''
+        regular = str(ratings.get('regular')) if ratings.get('regular') else ''
+        quick = str(ratings.get('quick')) if ratings.get('quick') else ''
+        blitz = str(ratings.get('blitz')) if ratings.get('blitz') else ''
+        
+        # Get first available online rating
+        online_rating = ''
+        if ratings.get('online_regular'):
+            online_rating = f"O{ratings.get('online_regular')}"
+        elif ratings.get('online_quick'):
+            online_rating = f"O{ratings.get('online_quick')}"
+        elif ratings.get('online_blitz'):
+            online_rating = f"O{ratings.get('online_blitz')}"
         
         # Truncate long names
-        if len(name) > 34:
-            name = name[:31] + '...'
+        if len(name) > 29:
+            name = name[:26] + '...'
         
-        print(f"{name:<35} {member_id:<12} {state:<6} {regular:<10} {quick:<10} {blitz:<10}")
+        print(f"{name:<30} {member_id:<10} {state:<6} {regular:<10} {quick:<10} {blitz:<10} {online_rating:<10}")
     
-    print("=" * 92)
-    print(f"\n✅ Found {len(players)} player(s)\n")
+    print("=" * 110)
+    print(f"\n✅ Found {len(players)} player(s)")
+    print("ℹ️  Online ratings shown as 'O' prefix when available\n")
 
 
 def main():
