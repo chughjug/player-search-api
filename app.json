@@ -1,0 +1,34 @@
+{
+  "name": "Player Search API",
+  "description": "US Chess player search API with CSV export",
+  "repository": "https://github.com/chughjug/player-search-api",
+  "logo": "https://node-js-sample.herokuapp.com/node.png",
+  "keywords": [
+    "chess",
+    "player-search",
+    "uscf",
+    "api",
+    "express"
+  ],
+  "env": {
+    "NODE_ENV": {
+      "required": true,
+      "value": "production"
+    }
+  },
+  "formation": {
+    "web": {
+      "quantity": 1,
+      "size": "eco"
+    }
+  },
+  "buildpacks": [
+    {
+      "url": "heroku/nodejs"
+    },
+    {
+      "url": "https://github.com/heroku/heroku-buildpack-google-chrome"
+    }
+  ]
+}
+
