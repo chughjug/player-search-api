@@ -12,9 +12,6 @@ on:
       - main
     paths:
       - 'api/**'
-  schedule:
-    # Runs every hour
-    - cron: '0 * * * *'
 
 jobs:
   search-players:
